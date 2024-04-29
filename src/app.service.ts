@@ -33,6 +33,8 @@ export class AppService {
     enlace.urlOriginal = urlOriginal;
     enlace.slug = v4();
     enlace.fechaExpiracion = fechaExp || null;
+    enlace.fechaCreacion = new Date();
+    enlace.fechaCreacion.setUTCHours(enlace.fechaCreacion.getUTCHours() + -4);
 
     return this.enlaceRepository.save(enlace);
   }

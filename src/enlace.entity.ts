@@ -1,10 +1,4 @@
-import {
-  Entity,
-  PrimaryGeneratedColumn,
-  Column,
-  Index,
-  CreateDateColumn,
-} from 'typeorm';
+import { Column, Entity, Index, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
 export class Enlace {
@@ -18,9 +12,9 @@ export class Enlace {
   @Column()
   urlOriginal: string;
 
-  @CreateDateColumn()
+  @Column({ type: 'timestamp with time zone', nullable: true })
   fechaCreacion: Date;
 
   @Column({ type: 'timestamp with time zone', nullable: true })
-  fechaExpiracion: Date | null;
+  fechaExpiracion: Date;
 }
