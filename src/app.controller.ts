@@ -5,9 +5,15 @@ import { AppService } from './app.service';
 export class AppController {
   constructor(private readonly appService: AppService) {}
 
-  @Post('enlace')
-  async crearEnlace(@Body('urlOriginal') urlOriginal: string) {
-    const enlace = await this.appService.crearEnlace(urlOriginal);
+  @Post()
+  async crearEnlace(
+    @Body('urlOriginal') urlOriginal: string,
+    @Body('fechaExpiracion') fechaExpiracion?: string,
+  ) {
+    const enlace = await this.appService.crearEnlace(
+      urlOriginal,
+      fechaExpiracion,
+    );
     return { slug: enlace.slug, urlOriginal: enlace.urlOriginal };
   }
 
@@ -16,5 +22,10 @@ export class AppController {
   async obtenerUrlOriginal(@Param('slug') slug: string) {
     const urlOriginal = await this.appService.obtenerUrlOriginal(slug);
     return { url: urlOriginal };
+  }
+
+  @Get()
+  async getAll() {
+    return await this.appService.getAll();
   }
 }

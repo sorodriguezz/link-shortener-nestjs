@@ -11,9 +11,9 @@ export class Enlace {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Index() // Indexar para búsquedas más rápidas
+  @Index()
   @Column({ unique: true })
-  slug: string; // Versión corta o identificador del enlace
+  slug: string;
 
   @Column()
   urlOriginal: string;
@@ -21,6 +21,6 @@ export class Enlace {
   @CreateDateColumn()
   fechaCreacion: Date;
 
-  @Column({ nullable: true })
-  fechaExpiracion: Date; // Opcional, si quieres que los enlaces expiren
+  @Column({ type: 'timestamp with time zone', nullable: true })
+  fechaExpiracion: Date | null;
 }

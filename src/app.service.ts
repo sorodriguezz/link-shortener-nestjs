@@ -1,7 +1,12 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Enlace } from './enlace.entity';
-import { MoreThan, Repository } from 'typeorm';
+import { v4 } from 'uuid';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class AppService {
@@ -10,29 +15,56 @@ export class AppService {
     private readonly enlaceRepository: Repository<Enlace>,
   ) {}
 
-  async crearEnlace(urlOriginal: string): Promise<Enlace> {
+  async crearEnlace(
+    urlOriginal: string,
+    fechaExpiracion: string,
+  ): Promise<Enlace> {
+    let fechaExp: Date | undefined = undefined;
+
+    if (fechaExpiracion) {
+      fechaExp = new Date(fechaExpiracion);
+
+      if (isNaN(fechaExp.getTime())) {
+        throw new BadRequestException('Fecha de expiración inválida.');
+      }
+    }
+
     const enlace = new Enlace();
     enlace.urlOriginal = urlOriginal;
-    enlace.slug = this.generarSlug();
-    enlace.fechaExpiracion = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 1 semana
+    enlace.slug = v4();
+    enlace.fechaExpiracion = fechaExp || null;
 
     return this.enlaceRepository.save(enlace);
   }
 
   async obtenerUrlOriginal(slug: string): Promise<string> {
     const enlace = await this.enlaceRepository.findOne({
-      where: { slug, fechaExpiracion: MoreThan(new Date()) },
+      where: {
+        slug,
+      },
     });
 
     if (!enlace) {
-      throw new NotFoundException('Enlace no encontrado o expirado.');
+      throw new NotFoundException('Enlace no encontrado.');
+    }
+
+    if (enlace.fechaExpiracion) {
+      if (enlace.fechaExpiracion < new Date()) {
+        throw new NotFoundException('Enlace expirado.');
+      }
     }
 
     return enlace.urlOriginal;
   }
 
-  private generarSlug(): string {
-    // Generar un slug único. Esta es una implementación muy básica.
-    return Math.random().toString(36).substring(2, 8);
+  async getAll() {
+    return await this.enlaceRepository.find({
+      select: {
+        slug: true,
+        fechaExpiracion: true,
+        urlOriginal: true,
+        fechaCreacion: true,
+      },
+    });
   }
 }
